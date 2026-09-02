@@ -1,0 +1,3060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deriv Live Digit Momentum Analyzer</title>
+
+<style>
+:root {
+    --bg: #07111f;
+    --panel: #0d1b2a;
+    --panel2: #111f31;
+    --text: #f8fafc;
+    --muted: #94a3b8;
+    --border: #26384d;
+
+    --green: #16a34a;
+    --blue: #2563eb;
+    --yellow: #eab308;
+    --red: #dc2626;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* =========================================================
+   LOGIN
+   ========================================================= */
+
+#loginScreen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 390px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 28px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.35);
+}
+
+.login-card h1 {
+    margin: 0 0 8px;
+    font-size: 25px;
+}
+
+.login-card p {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 24px;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.input-group input,
+.control select,
+.control input {
+    width: 100%;
+    padding: 12px;
+    background: #081522;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: white;
+    outline: none;
+}
+
+.password-row {
+    display: flex;
+    gap: 8px;
+}
+
+.password-row input {
+    flex: 1;
+}
+
+.show-password {
+    border: 1px solid var(--border);
+    background: #15263a;
+    color: white;
+    border-radius: 10px;
+    padding: 0 12px;
+    cursor: pointer;
+}
+
+.remember {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    color: var(--muted);
+    font-size: 12px;
+    margin-bottom: 18px;
+}
+
+.login-btn,
+#startBtn {
+    width: 100%;
+    padding: 13px;
+    border: 0;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 800;
+    color: white;
+    background: #2563eb;
+}
+
+.error-card {
+    margin-top: 15px;
+    padding: 11px;
+    border-radius: 9px;
+    background: rgba(220,38,38,.15);
+    border: 1px solid rgba(239,68,68,.4);
+    color: #fca5a5;
+    font-size: 12px;
+}
+
+/* =========================================================
+   APP
+   ========================================================= */
+
+#app {
+    min-height: 100vh;
+    padding: 18px;
+}
+
+.container {
+    max-width: 1250px;
+    margin: auto;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 18px;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 23px;
+}
+
+.header p {
+    margin: 5px 0 0;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 13px;
+    border-radius: 30px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.status-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #64748b;
+}
+
+.status-dot.live {
+    background: #22c55e;
+    box-shadow: 0 0 12px #22c55e;
+}
+
+/* =========================================================
+   CONTROLS
+   ========================================================= */
+
+.controls {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.control {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px;
+}
+
+.control label {
+    display: block;
+    font-size: 10px;
+    color: var(--muted);
+    margin-bottom: 6px;
+}
+
+#startBtn {
+    height: 100%;
+    background: var(--green);
+}
+
+#startBtn.stop {
+    background: var(--red);
+}
+
+/* =========================================================
+   METRICS
+   ========================================================= */
+
+.metrics {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.metric {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    padding: 14px;
+}
+
+.metric-label {
+    color: var(--muted);
+    font-size: 10px;
+    text-transform: uppercase;
+}
+
+.metric-value {
+    font-size: 21px;
+    font-weight: 800;
+    margin-top: 7px;
+}
+
+/* =========================================================
+   DIGIT MOMENTUM BOARD
+   ========================================================= */
+
+.panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 15px;
+}
+
+.panel-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.panel-title h2 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.panel-title span {
+    font-size: 10px;
+    color: var(--muted);
+}
+
+#digitGrid {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 8px;
+}
+
+/* =========================================================
+   DIGIT CIRCLES
+   ========================================================= */
+
+.digit {
+    min-width: 65px;
+    padding: 7px 3px;
+    text-align: center;
+    background: transparent;
+    border: 0;
+}
+
+.digit-number {
+    width: 58px;
+    height: 58px;
+    margin: auto;
+
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 23px;
+    font-weight: 900;
+
+    background: #334155;
+    color: white;
+
+    border: 3px solid #64748b;
+
+    transition:
+        transform .25s ease,
+        background .25s ease,
+        border-color .25s ease,
+        box-shadow .25s ease;
+}
+
+/* Highest momentum */
+.momentum-high .digit-number {
+    background: var(--green);
+    border-color: #4ade80;
+    box-shadow: 0 0 18px rgba(34,197,94,.7);
+    transform: scale(1.14);
+}
+
+/* Second highest momentum */
+.momentum-second-high .digit-number {
+    background: var(--blue);
+    border-color: #60a5fa;
+    box-shadow: 0 0 15px rgba(59,130,246,.65);
+    transform: scale(1.08);
+}
+
+/* Second lowest momentum */
+.momentum-second-low .digit-number {
+    background: var(--yellow);
+    border-color: #fde047;
+    color: #111827;
+    box-shadow: 0 0 15px rgba(250,204,21,.65);
+}
+
+/* Lowest momentum */
+.momentum-low .digit-number {
+    background: var(--red);
+    border-color: #f87171;
+    box-shadow: 0 0 18px rgba(239,68,68,.7);
+    transform: scale(1.08);
+}
+
+/* Neutral */
+.momentum-neutral .digit-number {
+    background: #334155;
+    border-color: #64748b;
+}
+
+.digit-percent {
+    margin-top: 7px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.digit-bar {
+    width: 45px;
+    height: 3px;
+    margin: 5px auto 0;
+    background: #1e293b;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.digit-fill {
+    height: 100%;
+    background: #64748b;
+    border-radius: 4px;
+}
+
+.hot-cold {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    color: var(--muted);
+    font-size: 11px;
+    margin-top: 15px;
+}
+
+/* =========================================================
+   LOWER PANELS
+   ========================================================= */
+
+.two-column {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.analysis-row {
+    display: grid;
+    grid-template-columns: 45px 1fr 55px 35px;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 11px;
+}
+
+.analysis-window {
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.mini-bar {
+    height: 7px;
+    background: #17263a;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.mini-fill {
+    height: 100%;
+    background: #3b82f6;
+    border-radius: 10px;
+}
+
+.analysis-value,
+.analysis-direction {
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.contract-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.contract-card {
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 11px;
+}
+
+.contract-name {
+    font-size: 10px;
+    color: var(--muted);
+}
+
+.contract-prob {
+    font-size: 19px;
+    font-weight: 800;
+    margin-top: 5px;
+}
+
+.contract-meta {
+    color: var(--muted);
+    font-size: 8px;
+    margin-top: 4px;
+}
+
+/* =========================================================
+   SIGNAL
+   ========================================================= */
+
+.signal {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    background: var(--panel);
+    margin-bottom: 15px;
+}
+
+.signal.good {
+    border-color: rgba(34,197,94,.65);
+    box-shadow: 0 0 25px rgba(34,197,94,.08);
+}
+
+.signal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.signal-state {
+    font-size: 24px;
+    font-weight: 900;
+}
+
+.signal-score {
+    font-size: 28px;
+    font-weight: 900;
+}
+
+.signal-contract {
+    color: var(--muted);
+    font-size: 11px;
+    margin-top: 5px;
+}
+
+.signal-reason {
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 11px;
+}
+
+/* =========================================================
+   RECENT TICKS
+   ========================================================= */
+
+.tick-list {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 7px;
+}
+
+.tick-item {
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px;
+    text-align: center;
+}
+
+.tick-price {
+    font-size: 10px;
+}
+
+.tick-digit {
+    font-size: 20px;
+    font-weight: 900;
+    margin: 3px 0;
+}
+
+/* =========================================================
+   ORDER
+   ========================================================= */
+
+.order-btn {
+    width: 100%;
+    padding: 13px;
+    border: 0;
+    border-radius: 10px;
+    background: #22c55e;
+    color: white;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 900px) {
+    .controls,
+    .metrics {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    #digitGrid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+
+    .two-column {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 500px) {
+    #app {
+        padding: 10px;
+    }
+
+    .header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .controls,
+    .metrics {
+        grid-template-columns: 1fr;
+    }
+
+    #digitGrid {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 4px;
+    }
+
+    .digit {
+        min-width: 55px;
+    }
+
+    .digit-number {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
+
+    .contract-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- =======================================================
+     LOGIN
+     ======================================================= -->
+
+<div id="loginScreen">
+
+    <div class="login-card">
+
+        <h1>Deriv Live Analyzer</h1>
+
+        <p>
+            Live public market-data analysis.
+            No automatic trading.
+        </p>
+
+        <form id="loginForm">
+
+            <div class="input-group">
+                <label>Username</label>
+                <input
+                    id="username"
+                    type="text"
+                    autocomplete="username"
+                    required
+                >
+            </div>
+
+            <div class="input-group">
+                <label>Password</label>
+
+                <div class="password-row">
+                    <input
+                        id="password"
+                        type="password"
+                        autocomplete="current-password"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        class="show-password"
+                        id="showPassword"
+                    >
+                        Show
+                    </button>
+                </div>
+            </div>
+
+            <label class="remember">
+                <input
+                    type="checkbox"
+                    id="remember"
+                >
+                Remember username
+            </label>
+
+            <button
+                type="submit"
+                class="login-btn"
+            >
+                LOGIN
+            </button>
+
+        </form>
+
+        <div
+            id="loginErrorCard"
+            class="error-card hidden"
+        >
+            Invalid username or password.
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =======================================================
+     APP
+     ======================================================= -->
+
+<div id="app" class="hidden">
+
+<div class="container">
+
+    <div class="header">
+
+        <div>
+            <h1>Live Digit Momentum Analyzer</h1>
+
+            <p>
+                Live distribution • momentum ranking •
+                statistical analysis
+            </p>
+        </div>
+
+        <div class="status">
+            <span
+                id="statusDot"
+                class="status-dot"
+            ></span>
+
+            <span id="connectionStatus">
+                OFFLINE
+            </span>
+        </div>
+
+    </div>
+
+
+    <!-- CONTROLS -->
+
+    <div class="controls">
+
+        <div class="control">
+            <label>Market</label>
+
+            <select id="market">
+                <option value="1HZ10V">
+                    Volatility 10 (1s)
+                </option>
+                <option value="1HZ25V">
+                    Volatility 25 (1s)
+                </option>
+                <option value="1HZ50V">
+                    Volatility 50 (1s)
+                </option>
+                <option value="1HZ75V">
+                    Volatility 75 (1s)
+                </option>
+                <option value="1HZ100V">
+                    Volatility 100 (1s)
+                </option>
+            </select>
+        </div>
+
+        <div class="control">
+            <label>Family</label>
+
+            <select id="family">
+                <option value="digit">
+                    Digit
+                </option>
+
+                <option value="direction">
+                    Direction
+                </option>
+            </select>
+        </div>
+
+        <div class="control">
+            <label>Contract</label>
+
+            <select id="contract"></select>
+        </div>
+
+        <div class="control">
+            <label>Window</label>
+
+            <select id="window">
+                <option value="30">30 ticks</option>
+                <option value="100">100 ticks</option>
+                <option value="500" selected>500 ticks</option>
+            </select>
+        </div>
+
+        <div class="control">
+            <label>Barrier</label>
+
+            <input
+                id="barrier"
+                type="number"
+                placeholder="Optional"
+            >
+        </div>
+
+    </div>
+
+
+    <button id="startBtn">
+        ▶ START ANALYSIS
+    </button>
+
+    <br><br>
+
+
+    <!-- METRICS -->
+
+    <div class="metrics">
+
+        <div class="metric">
+            <div class="metric-label">
+                Ticks Loaded
+            </div>
+
+            <div
+                class="metric-value"
+                id="ticksLoaded"
+            >
+                0
+            </div>
+        </div>
+
+        <div class="metric">
+            <div class="metric-label">
+                Last Price
+            </div>
+
+            <div
+                class="metric-value"
+                id="lastPrice"
+            >
+                —
+            </div>
+        </div>
+
+        <div class="metric">
+            <div class="metric-label">
+                Last Digit
+            </div>
+
+            <div
+                class="metric-value"
+                id="lastDigit"
+            >
+                —
+            </div>
+        </div>
+
+        <div class="metric">
+            <div class="metric-label">
+                Quality
+            </div>
+
+            <div
+                class="metric-value"
+                id="quality"
+            >
+                0%
+            </div>
+        </div>
+
+        <div class="metric">
+            <div class="metric-label">
+                Agreement
+            </div>
+
+            <div
+                class="metric-value"
+                id="agreement"
+            >
+                0%
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- DIGIT BOARD -->
+
+    <div
+        id="digitPanel"
+        class="panel"
+    >
+
+        <div class="panel-title">
+
+            <h2>
+                Live Digit Distribution
+            </h2>
+
+            <span>
+                500-tick rolling distribution
+            </span>
+
+        </div>
+
+        <div id="digitGrid"></div>
+
+        <div
+            id="hotColdSummary"
+            class="hot-cold"
+        >
+            Waiting for tick data…
+        </div>
+
+    </div>
+
+
+    <!-- SIGNAL -->
+
+    <div
+        id="signalBox"
+        class="signal"
+    >
+
+        <div class="signal-head">
+
+            <div>
+
+                <div
+                    id="signalState"
+                    class="signal-state"
+                >
+                    WAIT
+                </div>
+
+                <div
+                    id="signalContract"
+                    class="signal-contract"
+                >
+                    Waiting for data
+                </div>
+
+            </div>
+
+            <div
+                id="signalScore"
+                class="signal-score"
+            >
+                0
+            </div>
+
+        </div>
+
+        <div
+            id="signalReason"
+            class="signal-reason"
+        >
+            Waiting for enough live tick data.
+        </div>
+
+    </div>
+
+
+    <!-- ANALYSIS + CONTRACTS -->
+
+    <div class="two-column">
+
+        <div class="panel">
+
+            <div class="panel-title">
+                <h2>Multi-Window Momentum</h2>
+            </div>
+
+            <div id="analysisList"></div>
+
+        </div>
+
+
+        <div class="panel">
+
+            <div class="panel-title">
+                <h2>Contract Scanner</h2>
+            </div>
+
+            <div
+                id="contractGrid"
+                class="contract-grid"
+            ></div>
+
+        </div>
+
+    </div>
+
+
+    <!-- RECENT TICKS -->
+
+    <div class="panel">
+
+        <div class="panel-title">
+
+            <h2>Recent Live Ticks</h2>
+
+            <span>
+                Latest 15
+            </span>
+
+        </div>
+
+        <div
+            id="tickList"
+            class="tick-list"
+        ></div>
+
+    </div>
+
+
+    <!-- EDGE -->
+
+    <div class="metrics">
+
+        <div class="metric">
+
+            <div class="metric-label">
+                Edge
+            </div>
+
+            <div
+                id="edge"
+                class="metric-value"
+            >
+                0%
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ORDER -->
+
+    <button
+        id="orderBtn"
+        class="order-btn"
+    >
+        CONTACT / ORDER
+    </button>
+
+</div>
+</div>
+
+
+<script>
+/* =========================================================
+   DERIV LIVE ANALYZER
+   ========================================================= */
+
+const ACCESS_USERNAME = "Trade34";
+const ACCESS_PASSWORD = "Nairobi23";
+
+const WS_URL =
+    "wss://api.derivws.com/trading/v1/options/ws/public";
+
+let socket = null;
+let running = false;
+let reconnectTimer = null;
+let requestId = 0;
+
+let ticks = [];
+
+let currentSymbol = "1HZ10V";
+let currentPipSize = 2;
+
+const MAX_TICKS = 500;
+
+
+/* =========================================================
+   DOM
+   ========================================================= */
+
+const loginScreen =
+    document.getElementById("loginScreen");
+
+const app =
+    document.getElementById("app");
+
+const loginForm =
+    document.getElementById("loginForm");
+
+const usernameInput =
+    document.getElementById("username");
+
+const passwordInput =
+    document.getElementById("password");
+
+const rememberInput =
+    document.getElementById("remember");
+
+const loginErrorCard =
+    document.getElementById("loginErrorCard");
+
+const showPassword =
+    document.getElementById("showPassword");
+
+const startBtn =
+    document.getElementById("startBtn");
+
+const market =
+    document.getElementById("market");
+
+const family =
+    document.getElementById("family");
+
+const contract =
+    document.getElementById("contract");
+
+const windowSelect =
+    document.getElementById("window");
+
+const barrierInput =
+    document.getElementById("barrier");
+
+const statusDot =
+    document.getElementById("statusDot");
+
+const connectionStatus =
+    document.getElementById("connectionStatus");
+
+const ticksLoaded =
+    document.getElementById("ticksLoaded");
+
+const lastPrice =
+    document.getElementById("lastPrice");
+
+const lastDigit =
+    document.getElementById("lastDigit");
+
+const quality =
+    document.getElementById("quality");
+
+const agreement =
+    document.getElementById("agreement");
+
+const edge =
+    document.getElementById("edge");
+
+const digitPanel =
+    document.getElementById("digitPanel");
+
+const digitGrid =
+    document.getElementById("digitGrid");
+
+const hotColdSummary =
+    document.getElementById("hotColdSummary");
+
+const signalBox =
+    document.getElementById("signalBox");
+
+const signalState =
+    document.getElementById("signalState");
+
+const signalContract =
+    document.getElementById("signalContract");
+
+const signalScore =
+    document.getElementById("signalScore");
+
+const signalReason =
+    document.getElementById("signalReason");
+
+const analysisList =
+    document.getElementById("analysisList");
+
+const contractGrid =
+    document.getElementById("contractGrid");
+
+const tickList =
+    document.getElementById("tickList");
+
+
+/* =========================================================
+   CONTRACT OPTIONS
+   ========================================================= */
+
+const digitContracts = [
+    "Matches",
+    "Differs",
+    "Over",
+    "Under",
+    "Even",
+    "Odd"
+];
+
+const directionalContracts = [
+    "Rise",
+    "Fall",
+    "Higher",
+    "Lower"
+];
+
+function updateContractOptions() {
+
+    const isDigit =
+        family.value === "digit";
+
+    const list =
+        isDigit
+            ? digitContracts
+            : directionalContracts;
+
+    contract.innerHTML = "";
+
+    list.forEach(name => {
+
+        const option =
+            document.createElement("option");
+
+        option.value = name;
+        option.textContent = name;
+
+        contract.appendChild(option);
+    });
+
+    digitPanel.classList.toggle(
+        "hidden",
+        !isDigit
+    );
+
+    updateBarrierState();
+
+    renderAll();
+}
+
+function updateBarrierState() {
+
+    const directional =
+        family.value === "direction" ||
+        ["Higher", "Lower"].includes(
+            contract.value
+        );
+
+    barrierInput.disabled =
+        !directional;
+
+    if (!directional) {
+        barrierInput.value = "";
+    }
+}
+
+family.addEventListener(
+    "change",
+    updateContractOptions
+);
+
+contract.addEventListener(
+    "change",
+    () => {
+        updateBarrierState();
+        renderAll();
+    }
+);
+
+
+/* =========================================================
+   LOGIN
+   ========================================================= */
+
+showPassword.addEventListener(
+    "click",
+    () => {
+
+        const hidden =
+            passwordInput.type === "password";
+
+        passwordInput.type =
+            hidden ? "text" : "password";
+
+        showPassword.textContent =
+            hidden ? "Hide" : "Show";
+    }
+);
+
+function loadRememberedUsername() {
+
+    const saved =
+        localStorage.getItem(
+            "deriv_analyzer_username"
+        );
+
+    if (saved) {
+
+        usernameInput.value =
+            saved;
+
+        rememberInput.checked =
+            true;
+    }
+}
+
+loadRememberedUsername();
+
+loginForm.addEventListener(
+    "submit",
+    event => {
+
+        event.preventDefault();
+
+        const username =
+            usernameInput.value.trim();
+
+        const password =
+            passwordInput.value;
+
+        if (
+            username === ACCESS_USERNAME &&
+            password === ACCESS_PASSWORD
+        ) {
+
+            if (rememberInput.checked) {
+
+                localStorage.setItem(
+                    "deriv_analyzer_username",
+                    username
+                );
+
+            } else {
+
+                localStorage.removeItem(
+                    "deriv_analyzer_username"
+                );
+            }
+
+            loginErrorCard.classList.add(
+                "hidden"
+            );
+
+            loginScreen.classList.add(
+                "hidden"
+            );
+
+            app.classList.remove(
+                "hidden"
+            );
+
+            updateContractOptions();
+
+        } else {
+
+            loginErrorCard.classList.remove(
+                "hidden"
+            );
+        }
+    }
+);
+
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+
+function nextRequestId() {
+
+    requestId += 1;
+
+    return requestId;
+}
+
+function setStatus(online, text) {
+
+    statusDot.classList.toggle(
+        "live",
+        online
+    );
+
+    connectionStatus.textContent =
+        text;
+}
+
+function getWindowSize() {
+
+    return Number(
+        windowSelect.value
+    );
+}
+
+function getDigit(price) {
+
+    const text =
+        Number(price).toFixed(
+            currentPipSize
+        );
+
+    const parts =
+        text.split(".");
+
+    if (parts.length === 1) {
+        return Number(
+            text.slice(-1)
+        );
+    }
+
+    return Number(
+        parts[1].slice(-1)
+    );
+}
+
+function formatPrice(price) {
+
+    return Number(price).toFixed(
+        currentPipSize
+    );
+}
+
+function clamp(value, min, max) {
+
+    return Math.max(
+        min,
+        Math.min(max, value)
+    );
+}
+
+
+/* =========================================================
+   WEBSOCKET
+   ========================================================= */
+
+function connect() {
+
+    if (!running) return;
+
+    clearTimeout(
+        reconnectTimer
+    );
+
+    setStatus(
+        false,
+        "CONNECTING"
+    );
+
+    try {
+
+        socket =
+            new WebSocket(WS_URL);
+
+    } catch (error) {
+
+        console.error(error);
+
+        scheduleReconnect();
+
+        return;
+    }
+
+    socket.addEventListener(
+        "open",
+        () => {
+
+            setStatus(
+                true,
+                "LIVE"
+            );
+
+            subscribeToMarket(
+                currentSymbol
+            );
+        }
+    );
+
+    socket.addEventListener(
+        "message",
+        event => {
+
+            handleMessage(
+                event.data
+            );
+        }
+    );
+
+    socket.addEventListener(
+        "error",
+        error => {
+
+            console.error(
+                "WebSocket error:",
+                error
+            );
+
+            setStatus(
+                false,
+                "ERROR"
+            );
+        }
+    );
+
+    socket.addEventListener(
+        "close",
+        () => {
+
+            socket = null;
+
+            if (running) {
+
+                setStatus(
+                    false,
+                    "RECONNECTING"
+                );
+
+                scheduleReconnect();
+
+            } else {
+
+                setStatus(
+                    false,
+                    "OFFLINE"
+                );
+            }
+        }
+    );
+}
+
+function scheduleReconnect() {
+
+    if (!running) return;
+
+    clearTimeout(
+        reconnectTimer
+    );
+
+    reconnectTimer =
+        setTimeout(
+            connect,
+            2500
+        );
+}
+
+function disconnect() {
+
+    clearTimeout(
+        reconnectTimer
+    );
+
+    if (socket) {
+
+        try {
+            socket.close();
+        } catch (_) {}
+
+    }
+
+    socket = null;
+}
+
+function send(data) {
+
+    if (
+        !socket ||
+        socket.readyState !==
+            WebSocket.OPEN
+    ) {
+        return false;
+    }
+
+    socket.send(
+        JSON.stringify(data)
+    );
+
+    return true;
+}
+
+
+/* =========================================================
+   MARKET
+   ========================================================= */
+
+function subscribeToMarket(symbol) {
+
+    currentSymbol = symbol;
+
+    send({
+
+        ticks_history: symbol,
+        end: "latest",
+        count: MAX_TICKS,
+        style: "ticks",
+        subscribe: 0,
+        req_id: nextRequestId()
+
+    });
+
+    send({
+
+        ticks: symbol,
+        subscribe: 1,
+        req_id: nextRequestId()
+
+    });
+}
+
+function changeMarket() {
+
+    if (!running) {
+
+        currentSymbol =
+            market.value;
+
+        return;
+    }
+
+    ticks = [];
+
+    renderAll();
+
+    disconnect();
+
+    currentSymbol =
+        market.value;
+
+    setTimeout(
+        () => {
+
+            if (running) {
+                connect();
+            }
+
+        },
+        100
+    );
+}
+
+market.addEventListener(
+    "change",
+    changeMarket
+);
+
+
+/* =========================================================
+   MESSAGE HANDLER
+   ========================================================= */
+
+function handleMessage(raw) {
+
+    let data;
+
+    try {
+
+        data =
+            JSON.parse(raw);
+
+    } catch (error) {
+
+        console.error(
+            "Invalid WebSocket message",
+            error
+        );
+
+        return;
+    }
+
+    if (data.error) {
+
+        console.error(
+            "Deriv API error:",
+            data.error
+        );
+
+        setStatus(
+            false,
+            "API ERROR"
+        );
+
+        return;
+    }
+
+    if (
+        data.msg_type ===
+        "history"
+    ) {
+
+        handleHistory(data);
+
+        return;
+    }
+
+    if (
+        data.msg_type ===
+        "tick"
+    ) {
+
+        handleTick(data);
+
+        return;
+    }
+}
+
+
+/* =========================================================
+   HISTORY
+   ========================================================= */
+
+function handleHistory(data) {
+
+    const history =
+        data.history;
+
+    if (
+        !history ||
+        !Array.isArray(
+            history.prices
+        )
+    ) {
+        return;
+    }
+
+    currentPipSize =
+        Number.isFinite(
+            Number(data.pip_size)
+        )
+            ? Number(data.pip_size)
+            : inferPipSize(
+                history.prices
+            );
+
+    ticks = [];
+
+    for (
+        let i = 0;
+        i < history.prices.length;
+        i++
+    ) {
+
+        const price =
+            Number(
+                history.prices[i]
+            );
+
+        const epoch =
+            Array.isArray(
+                history.times
+            ) &&
+            history.times[i]
+                ? Number(
+                    history.times[i]
+                )
+                : Date.now() / 1000;
+
+        if (
+            !Number.isFinite(price)
+        ) {
+            continue;
+        }
+
+        ticks.push({
+
+            price,
+            epoch,
+            digit:
+                getDigit(price)
+
+        });
+    }
+
+    if (
+        ticks.length >
+        MAX_TICKS
+    ) {
+
+        ticks =
+            ticks.slice(
+                -MAX_TICKS
+            );
+    }
+
+    renderAll();
+}
+
+function inferPipSize(prices) {
+
+    if (
+        !prices ||
+        !prices.length
+    ) {
+        return 2;
+    }
+
+    const sample =
+        String(
+            prices[
+                prices.length - 1
+            ]
+        );
+
+    if (
+        !sample.includes(".")
+    ) {
+        return 0;
+    }
+
+    return sample
+        .split(".")[1]
+        .length;
+}
+
+
+/* =========================================================
+   LIVE TICK
+   ========================================================= */
+
+function handleTick(data) {
+
+    if (!data.tick) return;
+
+    const price =
+        Number(
+            data.tick.quote
+        );
+
+    if (
+        !Number.isFinite(price)
+    ) {
+        return;
+    }
+
+    if (
+        Number.isFinite(
+            Number(
+                data.tick.pip_size
+            )
+        )
+    ) {
+
+        currentPipSize =
+            Number(
+                data.tick.pip_size
+            );
+    }
+
+    const item = {
+
+        price,
+
+        epoch:
+            Number(
+                data.tick.epoch
+            ) ||
+            Date.now() / 1000,
+
+        digit:
+            getDigit(price)
+
+    };
+
+    ticks.push(item);
+
+    if (
+        ticks.length >
+        MAX_TICKS
+    ) {
+
+        ticks.shift();
+    }
+
+    lastPrice.textContent =
+        formatPrice(price);
+
+    lastDigit.textContent =
+        item.digit;
+
+    renderAll();
+}
+
+
+/* =========================================================
+   STATISTICS
+   ========================================================= */
+
+function getRecentTicks(
+    size = getWindowSize()
+) {
+
+    return ticks.slice(
+        -Math.min(
+            size,
+            ticks.length
+        )
+    );
+}
+
+function digitCounts(data) {
+
+    const counts =
+        Array(10).fill(0);
+
+    data.forEach(tick => {
+
+        if (
+            tick.digit >= 0 &&
+            tick.digit <= 9
+        ) {
+
+            counts[
+                tick.digit
+            ]++;
+        }
+    });
+
+    return counts;
+}
+
+function digitPercentages(data) {
+
+    const counts =
+        digitCounts(data);
+
+    const total =
+        data.length;
+
+    if (!total) {
+
+        return Array(10).fill(0);
+    }
+
+    return counts.map(
+        count =>
+            (count / total) *
+            100
+    );
+}
+
+function getHotCold(data) {
+
+    const percentages =
+        digitPercentages(data);
+
+    let hot = 0;
+    let cold = 0;
+
+    for (
+        let i = 1;
+        i < 10;
+        i++
+    ) {
+
+        if (
+            percentages[i] >
+            percentages[hot]
+        ) {
+            hot = i;
+        }
+
+        if (
+            percentages[i] <
+            percentages[cold]
+        ) {
+            cold = i;
+        }
+    }
+
+    return {
+
+        hot,
+        cold,
+
+        hotPercent:
+            percentages[hot],
+
+        coldPercent:
+            percentages[cold]
+
+    };
+}
+
+
+/* =========================================================
+   DIRECTION
+   ========================================================= */
+
+function directionalProbability(
+    data
+) {
+
+    if (data.length < 2) {
+
+        return {
+            rise: 50,
+            fall: 50
+        };
+    }
+
+    let rises = 0;
+    let falls = 0;
+
+    for (
+        let i = 1;
+        i < data.length;
+        i++
+    ) {
+
+        if (
+            data[i].price >
+            data[i - 1].price
+        ) {
+
+            rises++;
+
+        } else if (
+            data[i].price <
+            data[i - 1].price
+        ) {
+
+            falls++;
+        }
+    }
+
+    const total =
+        rises + falls;
+
+    if (!total) {
+
+        return {
+            rise: 50,
+            fall: 50
+        };
+    }
+
+    return {
+
+        rise:
+            (rises / total) *
+            100,
+
+        fall:
+            (falls / total) *
+            100
+
+    };
+}
+
+
+/* =========================================================
+   CONTRACT PROBABILITY
+   ========================================================= */
+
+function calculateContractProbability(
+    name,
+    data
+) {
+
+    if (!data.length) {
+        return 0;
+    }
+
+    const percentages =
+        digitPercentages(data);
+
+    switch (name) {
+
+        case "Even":
+
+            return (
+                percentages[0] +
+                percentages[2] +
+                percentages[4] +
+                percentages[6] +
+                percentages[8]
+            );
+
+        case "Odd":
+
+            return (
+                percentages[1] +
+                percentages[3] +
+                percentages[5] +
+                percentages[7] +
+                percentages[9]
+            );
+
+        case "Over":
+
+            return (
+                percentages[5] +
+                percentages[6] +
+                percentages[7] +
+                percentages[8] +
+                percentages[9]
+            );
+
+        case "Under":
+
+            return (
+                percentages[0] +
+                percentages[1] +
+                percentages[2] +
+                percentages[3] +
+                percentages[4]
+            );
+
+        case "Matches":
+
+            return Math.max(
+                ...percentages
+            );
+
+        case "Differs":
+
+            return (
+                100 -
+                Math.max(
+                    ...percentages
+                )
+            );
+
+        case "Rise":
+        case "Higher":
+
+            return directionalProbability(
+                data
+            ).rise;
+
+        case "Fall":
+        case "Lower":
+
+            return directionalProbability(
+                data
+            ).fall;
+
+        default:
+            return 0;
+    }
+}
+
+
+/* =========================================================
+   MULTI WINDOW
+   ========================================================= */
+
+function calculateWindowAnalysis() {
+
+    const windows =
+        [30, 100, 500];
+
+    return windows.map(
+        size => {
+
+            const data =
+                getRecentTicks(size);
+
+            let probability = 50;
+            let direction = "—";
+
+            if (
+                family.value ===
+                "digit"
+            ) {
+
+                const percentages =
+                    digitPercentages(
+                        data
+                    );
+
+                probability =
+                    Math.max(
+                        ...percentages
+                    );
+
+                const bestDigit =
+                    percentages.indexOf(
+                        probability
+                    );
+
+                direction =
+                    String(bestDigit);
+
+            } else {
+
+                const dir =
+                    directionalProbability(
+                        data
+                    );
+
+                probability =
+                    Math.max(
+                        dir.rise,
+                        dir.fall
+                    );
+
+                direction =
+                    dir.rise >= dir.fall
+                        ? "↑"
+                        : "↓";
+            }
+
+            return {
+
+                size,
+                probability,
+                direction
+
+            };
+        }
+    );
+}
+
+
+/* =========================================================
+   QUALITY
+   ========================================================= */
+
+function calculateQuality(data) {
+
+    if (data.length < 10) {
+        return 0;
+    }
+
+    const sampleQuality =
+        clamp(
+            data.length / 500,
+            0,
+            1
+        ) * 60;
+
+    const percentages =
+        digitPercentages(data);
+
+    const max =
+        Math.max(
+            ...percentages
+        );
+
+    const min =
+        Math.min(
+            ...percentages
+        );
+
+    const spread =
+        max - min;
+
+    const stability =
+        clamp(
+            1 - spread / 20,
+            0,
+            1
+        ) * 40;
+
+    return Math.round(
+        clamp(
+            sampleQuality +
+            stability,
+            0,
+            100
+        )
+    );
+}
+
+
+/* =========================================================
+   AGREEMENT
+   ========================================================= */
+
+function calculateAgreement() {
+
+    const analyses =
+        calculateWindowAnalysis();
+
+    if (!analyses.length) {
+        return 0;
+    }
+
+    if (
+        family.value ===
+        "digit"
+    ) {
+
+        const digits =
+            analyses.map(
+                x => x.direction
+            );
+
+        const counts = {};
+
+        digits.forEach(
+            digit => {
+                counts[digit] =
+                    (counts[digit] || 0) + 1;
+            }
+        );
+
+        const mostCommon =
+            Object.keys(counts)
+                .sort(
+                    (a, b) =>
+                        counts[b] -
+                        counts[a]
+                )[0];
+
+        return Math.round(
+            (
+                counts[mostCommon] /
+                digits.length
+            ) * 100
+        );
+    }
+
+    const directions =
+        analyses.map(
+            x => x.direction
+        );
+
+    const up =
+        directions.filter(
+            x => x === "↑"
+        ).length;
+
+    const down =
+        directions.filter(
+            x => x === "↓"
+        ).length;
+
+    return Math.round(
+        (
+            Math.max(up, down) /
+            directions.length
+        ) * 100
+    );
+}
+
+
+/* =========================================================
+   EDGE
+   ========================================================= */
+
+function calculateEdge(data) {
+
+    if (!data.length) {
+        return 0;
+    }
+
+    const selected =
+        contract.value;
+
+    const probability =
+        calculateContractProbability(
+            selected,
+            data
+        );
+
+    let baseline = 50;
+
+    if (
+        selected === "Matches"
+    ) {
+        baseline = 10;
+    }
+
+    if (
+        selected === "Differs"
+    ) {
+        baseline = 90;
+    }
+
+    return probability -
+        baseline;
+}
+
+
+/* =========================================================
+   SIGNAL
+   ========================================================= */
+
+function calculateSignal() {
+
+    const data =
+        getRecentTicks();
+
+    if (data.length < 30) {
+
+        return {
+
+            state: "WAIT",
+
+            score: 0,
+
+            contract:
+                contract.value,
+
+            reason:
+                "Waiting for enough live tick data."
+
+        };
+    }
+
+    const probability =
+        calculateContractProbability(
+            contract.value,
+            data
+        );
+
+    const q =
+        calculateQuality(data);
+
+    const a =
+        calculateAgreement();
+
+    const score =
+        Math.round(
+            probability * 0.55 +
+            q * 0.25 +
+            a * 0.20
+        );
+
+    const good =
+        probability >= 50 &&
+        q >= 60 &&
+        a >= 66;
+
+    return {
+
+        state:
+            good
+                ? "GOOD"
+                : "WAIT",
+
+        score:
+            clamp(
+                score,
+                0,
+                100
+            ),
+
+        contract:
+            contract.value,
+
+        reason:
+            good
+                ? `${probability.toFixed(1)}% observed probability • ${a}% window agreement • ${q}% quality`
+                : `Filters not fully aligned • ${probability.toFixed(1)}% probability • ${a}% agreement • ${q}% quality`
+    };
+}
+
+
+/* =========================================================
+   DIGIT BOARD
+   ========================================================= */
+
+function renderDigitBoard() {
+
+    const data =
+        getRecentTicks();
+
+    const percentages =
+        digitPercentages(data);
+
+    digitGrid.innerHTML = "";
+
+    /*
+      Rank all digits by current
+      observed distribution.
+    */
+
+    const ranked =
+        percentages
+            .map(
+                (percent, digit) => ({
+                    digit,
+                    percent
+                })
+            )
+            .sort(
+                (a, b) =>
+                    a.percent -
+                    b.percent
+            );
+
+    if (!ranked.length) {
+        return;
+    }
+
+    /*
+      Lowest
+    */
+
+    const lowest =
+        ranked[0].digit;
+
+    /*
+      Second lowest
+    */
+
+    const secondLowest =
+        ranked[1].digit;
+
+    /*
+      Second highest
+    */
+
+    const secondHighest =
+        ranked[8].digit;
+
+    /*
+      Highest
+    */
+
+    const highest =
+        ranked[9].digit;
+
+
+    /*
+      Render digits 0-9 in normal
+      numerical order.
+    */
+
+    percentages.forEach(
+        (percent, digit) => {
+
+            const card =
+                document.createElement(
+                    "div"
+                );
+
+            card.className =
+                "digit";
+
+
+            /*
+              Apply dynamic momentum
+              color.
+            */
+
+            if (data.length >= 30) {
+
+                if (
+                    digit === highest
+                ) {
+
+                    card.classList.add(
+                        "momentum-high"
+                    );
+
+                } else if (
+                    digit ===
+                    secondHighest
+                ) {
+
+                    card.classList.add(
+                        "momentum-second-high"
+                    );
+
+                } else if (
+                    digit ===
+                    secondLowest
+                ) {
+
+                    card.classList.add(
+                        "momentum-second-low"
+                    );
+
+                } else if (
+                    digit === lowest
+                ) {
+
+                    card.classList.add(
+                        "momentum-low"
+                    );
+
+                } else {
+
+                    card.classList.add(
+                        "momentum-neutral"
+                    );
+                }
+
+            } else {
+
+                card.classList.add(
+                    "momentum-neutral"
+                );
+            }
+
+
+            card.innerHTML = `
+
+                <div class="digit-number">
+                    ${digit}
+                </div>
+
+                <div class="digit-percent">
+                    ${percent.toFixed(1)}%
+                </div>
+
+                <div class="digit-bar">
+
+                    <div
+                        class="digit-fill"
+                        style="
+                            width:${clamp(
+                                percent,
+                                0,
+                                100
+                            )}%
+                        "
+                    ></div>
+
+                </div>
+
+            `;
+
+            digitGrid.appendChild(
+                card
+            );
+        }
+    );
+
+
+    if (!data.length) {
+
+        hotColdSummary.textContent =
+            "Waiting for tick data…";
+
+        return;
+    }
+
+
+    hotColdSummary.innerHTML = `
+
+        <span>
+            🟢 High:
+            <strong>
+                ${highest}
+            </strong>
+            ${percentages[
+                highest
+            ].toFixed(1)}%
+        </span>
+
+        <span>
+            🔵 Second high:
+            <strong>
+                ${secondHighest}
+            </strong>
+            ${percentages[
+                secondHighest
+            ].toFixed(1)}%
+        </span>
+
+        <span>
+            🟡 Second low:
+            <strong>
+                ${secondLowest}
+            </strong>
+            ${percentages[
+                secondLowest
+            ].toFixed(1)}%
+        </span>
+
+        <span>
+            🔴 Low:
+            <strong>
+                ${lowest}
+            </strong>
+            ${percentages[
+                lowest
+            ].toFixed(1)}%
+        </span>
+
+    `;
+}
+
+
+/* =========================================================
+   SIGNAL RENDER
+   ========================================================= */
+
+function renderSignal() {
+
+    const result =
+        calculateSignal();
+
+    signalState.textContent =
+        result.state;
+
+    signalContract.textContent =
+        `${result.contract} • ${ticks.length} ticks`;
+
+    signalScore.textContent =
+        result.score;
+
+    signalReason.textContent =
+        result.reason;
+
+    signalBox.classList.toggle(
+        "good",
+        result.state === "GOOD"
+    );
+}
+
+
+/* =========================================================
+   ANALYSIS
+   ========================================================= */
+
+function renderAnalysis() {
+
+    const rows =
+        calculateWindowAnalysis();
+
+    analysisList.innerHTML = "";
+
+    rows.forEach(
+        row => {
+
+            const div =
+                document.createElement(
+                    "div"
+                );
+
+            div.className =
+                "analysis-row";
+
+            div.innerHTML = `
+
+                <span class="analysis-window">
+                    ${row.size}
+                </span>
+
+                <div class="mini-bar">
+
+                    <div
+                        class="mini-fill"
+                        style="
+                            width:${clamp(
+                                row.probability,
+                                0,
+                                100
+                            )}%
+                        "
+                    ></div>
+
+                </div>
+
+                <span class="analysis-value">
+                    ${row.probability.toFixed(1)}%
+                </span>
+
+                <span class="analysis-direction">
+                    ${row.direction}
+                </span>
+
+            `;
+
+            analysisList.appendChild(
+                div
+            );
+        }
+    );
+}
+
+
+/* =========================================================
+   CONTRACT SCANNER
+   ========================================================= */
+
+function renderContractScanner() {
+
+    const data =
+        getRecentTicks(500);
+
+    const contracts =
+        family.value === "digit"
+            ? digitContracts
+            : directionalContracts;
+
+    contractGrid.innerHTML = "";
+
+    contracts.forEach(
+        name => {
+
+            const probability =
+                calculateContractProbability(
+                    name,
+                    data
+                );
+
+            const card =
+                document.createElement(
+                    "div"
+                );
+
+            card.className =
+                "contract-card";
+
+            card.innerHTML = `
+
+                <div class="contract-name">
+                    ${name}
+                </div>
+
+                <div class="contract-prob">
+                    ${probability.toFixed(1)}%
+                </div>
+
+                <div class="contract-meta">
+                    ${data.length} ticks
+                </div>
+
+            `;
+
+            contractGrid.appendChild(
+                card
+            );
+        }
+    );
+}
+
+
+/* =========================================================
+   RECENT TICKS
+   ========================================================= */
+
+function renderRecentTicks() {
+
+    tickList.innerHTML = "";
+
+    const recent =
+        ticks
+            .slice(-15)
+            .reverse();
+
+    recent.forEach(
+        item => {
+
+            const div =
+                document.createElement(
+                    "div"
+                );
+
+            div.className =
+                "tick-item";
+
+            const time =
+                new Date(
+                    item.epoch * 1000
+                ).toLocaleTimeString(
+                    [],
+                    {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit"
+                    }
+                );
+
+            div.innerHTML = `
+
+                <div class="tick-price">
+                    ${formatPrice(item.price)}
+                </div>
+
+                <div class="tick-digit">
+                    ${item.digit}
+                </div>
+
+                <div
+                    style="
+                        font-size:7px;
+                        color:var(--muted)
+                    "
+                >
+                    ${time}
+                </div>
+
+            `;
+
+            tickList.appendChild(
+                div
+            );
+        }
+    );
+}
+
+
+/* =========================================================
+   METRICS
+   ========================================================= */
+
+function renderMetrics() {
+
+    const data =
+        getRecentTicks();
+
+    ticksLoaded.textContent =
+        ticks.length;
+
+    if (!data.length) {
+
+        lastPrice.textContent =
+            "—";
+
+        lastDigit.textContent =
+            "—";
+    }
+
+    const q =
+        calculateQuality(data);
+
+    const a =
+        calculateAgreement();
+
+    const e =
+        calculateEdge(data);
+
+    quality.textContent =
+        `${q}%`;
+
+    agreement.textContent =
+        `${a}%`;
+
+    edge.textContent =
+        `${e >= 0 ? "+" : ""}${e.toFixed(1)}%`;
+}
+
+
+/* =========================================================
+   RENDER ALL
+   ========================================================= */
+
+function renderAll() {
+
+    renderMetrics();
+
+    if (
+        family.value ===
+        "digit"
+    ) {
+
+        renderDigitBoard();
+    }
+
+    renderSignal();
+
+    renderAnalysis();
+
+    renderContractScanner();
+
+    renderRecentTicks();
+}
+
+
+/* =========================================================
+   START / STOP
+   ========================================================= */
+
+startBtn.addEventListener(
+    "click",
+    () => {
+
+        if (running) {
+
+            stopAnalysis();
+
+        } else {
+
+            startAnalysis();
+        }
+    }
+);
+
+function startAnalysis() {
+
+    running = true;
+
+    startBtn.textContent =
+        "■ STOP ANALYSIS";
+
+    startBtn.classList.add(
+        "stop"
+    );
+
+    ticks = [];
+
+    currentSymbol =
+        market.value;
+
+    setStatus(
+        false,
+        "CONNECTING"
+    );
+
+    connect();
+}
+
+function stopAnalysis() {
+
+    running = false;
+
+    startBtn.textContent =
+        "▶ START ANALYSIS";
+
+    startBtn.classList.remove(
+        "stop"
+    );
+
+    disconnect();
+
+    setStatus(
+        false,
+        "OFFLINE"
+    );
+
+    renderAll();
+}
+
+
+/* =========================================================
+   WINDOW
+   ========================================================= */
+
+windowSelect.addEventListener(
+    "change",
+    renderAll
+);
+
+
+/* =========================================================
+   BARRIER
+   ========================================================= */
+
+barrierInput.addEventListener(
+    "input",
+    renderAll
+);
+
+
+/* =========================================================
+   ORDER
+   ========================================================= */
+
+document
+    .getElementById("orderBtn")
+    .addEventListener(
+        "click",
+        () => {
+
+            const message =
+                "Hello I want to order";
+
+            window.open(
+                "https://wa.me/254701859605?text=" +
+                encodeURIComponent(
+                    message
+                ),
+                "_blank"
+            );
+        }
+    );
+
+
+/* =========================================================
+   INITIAL STATE
+   ========================================================= */
+
+updateContractOptions();
+
+renderAll();
+
+</script>
+
+</body>
+  </html>
